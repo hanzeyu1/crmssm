@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace与实体类相映射-->
+<mapper namespace="com.crm.dao.ProductMapper">
+
+    <select id="findAllProduct" resultType="com.crm.domin.Product">
+        select * from product
+    </select>
+
+    <insert id="addProduct" parameterType="com.crm.domin.Product">
+        insert into
+        product(PRODUCTNUM,PRODUCTNAME,CITYNAME,DEPARTURETIME,PRODUCTPRICE,PRODUCTDESC,PRODUCTSTATUS)
+        values(#{productNum},#{productName},#{cityName},#{departureTime},
+        #{productPrice},#{productDesc},#{productStatus})
+    </insert>
+
+    <update id="updateProduct" parameterType="com.crm.domin.Product" >
+        update product
+        set PRODUCTNUM=#{productNum},PRODUCTNAME=#{productName},CITYNAME=#{cityName},
+             DEPARTURETIME=#{departureTime},PRODUCTPRICE=#{productPrice},PRODUCTDESC=#{productDesc},
+             PRODUCTSTATUS=#{productStatus}
+        where id=#{id}
+    </update>
+
+    <select id="findProductById" resultType="com.crm.domin.Product" parameterType="string">
+        select * from product where id=#{id}
+    </select>
+
+    <delete id="delProductById" parameterType="string">
+        delete from product where id=#{id}
+    </delete>
+</mapper>

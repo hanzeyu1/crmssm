@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace与实体类相映射-->
+<mapper namespace="com.crm.dao.PermissionMapper">
+
+    <select id="findAll" resultType="com.crm.domin.Permission">
+        SELECT *
+        FROM PERMISSION
+    </select>
+
+    <insert id="addPermission" parameterType="com.crm.domin.Permission">
+        INSERT INTO
+        PERMISSION(PERMISSIONNAME,URL)
+        VALUES(#{permissionName},#{url})
+    </insert>
+
+    <select id="findPermissionById" parameterType="string" resultType="com.crm.domin.Permission">
+        SELECT *
+        FROM PERMISSION
+        WHERE ID = #{id}
+    </select>
+
+    <delete id="delRoleForDelPermissionByPermissionId" parameterType="string">
+        DELETE
+        FROM ROLE_PERMISSION
+        WHERE PERMISSIONID = #{id}
+    </delete>
+    <delete id="delPermissionById" parameterType="string">
+        DELETE
+        FROM PERMISSION
+        WHERE ID = #{id}
+    </delete>
+</mapper>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace与实体类相映射-->
+<mapper namespace="com.crm.dao.RoleMapper">
+
+    <resultMap id="ROLE" type="com.crm.domin.Role">
+        <id property="id" column="id"/>
+        <result property="roleName" column="ROLENAME"/>
+        <result property="roleDesc" column="ROLEDESC"/>
+        <collection property="permissions" ofType="com.crm.domin.Permission">
+            <id property="id" column="pid"/>
+            <result property="permissionName" column="PERMISSIONNAME"/>
+            <result property="url" column="URL"/>
+        </collection>
+    </resultMap>
+
+    <select id="findAllRole" resultType="com.crm.domin.Role">
+        SELECT *
+        FROM ROLE
+    </select>
+
+    <select id="findRoleById" resultMap="ROLE" parameterType="string">
+        SELECT r.ID,r.ROLENAME,r.ROLEDESC,
+			   p.ID pid,p.PERMISSIONNAME,p.URL
+        FROM ROLE r
+        LEFT JOIN ROLE_PERMISSION rp
+        ON r.ID = rp.ROLEID
+        LEFT JOIN PERMISSION p
+        ON rp.PERMISSIONID = p.ID
+        WHERE r.ID = #{id}
+    </select>
+
+    <select id="findPermissionForAddRoleByRoleId" parameterType="string" resultType="com.crm.domin.Permission">
+        SELECT *
+        FROM PERMISSION p
+        WHERE p.ID NOT IN(
+					SELECT rp.PERMISSIONID
+					FROM ROLE_PERMISSION rp
+					WHERE rp.ROLEID = #{id})
+    </select>
+
+    <insert id="addPermissionsForRole" parameterType="string">
+        INSERT INTO
+        ROLE_PERMISSION(PERMISSIONID,ROLEID)
+        VALUES (#{pid},#{rid})
+    </insert>
+
+    <insert id="addRole" parameterType="com.crm.domin.Role">
+        INSERT INTO
+        ROLE(ROLENAME,ROLEDESC)
+        VALUES(#{roleName},#{roleDesc})
+    </insert>
+
+</mapper>

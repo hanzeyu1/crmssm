@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace与实体类相映射-->
+<mapper namespace="com.crm.dao.OrdersMapper">
+    <resultMap id="OrdersList" type="com.crm.domin.Orders">
+        <id property="id" column="id"/>
+        <result column="ORDERNUM" property="orderNum"/>
+        <result column="ORDERTIME" property="orderTime"/>
+        <result column="ORDERSTATUS" property="orderStatus"/>
+        <association property="product" javaType="com.crm.domin.Product">
+            <id column="pid" property="id"/>
+            <result column="PRODUCTNAME" property="productName"/>
+            <result column="PRODUCTPRICE" property="productPrice"/>
+        </association>
+    </resultMap>
+    <select id="finAllOrders" resultMap="OrdersList">
+        SELECT o.ID,o.ORDERNUM,p.ID pid,p.PRODUCTNAME,p.PRODUCTPRICE,o.ORDERTIME,o.ORDERSTATUS
+        FROM ORDERS o
+        LEFT JOIN PRODUCT p
+        ON o.PRODUCTID = p.ID
+    </select>
+
+    <resultMap id="OrdersInfo" type="com.crm.domin.Orders">
+        <id property="id" column="id"/>
+        <result property="orderNum" column="ORDERNUM"/>
+        <result property="orderTime" column="ORDERTIME"/>
+        <result property="peopleCount" column="PEOPLECOUNT"/>
+        <result property="orderDesc" column="ORDERDESC"/>
+        <result property="payType" column="PAYTYPE"/>
+        <association property="product" javaType="com.crm.domin.Product">
+            <id property="id" column="pid"/>
+            <result property="productName" column="PRODUCTNAME"/>
+            <result property="cityName" column="CITYNAME"/>
+            <result property="departureTime" column="DEPARTURETIME"/>
+            <result property="productPrice" column="PRODUCTPRICE"/>
+        </association>
+        <association property="member" javaType="com.crm.domin.Member">
+            <id property="id" column="mid"/>
+            <result property="nickname" column="NICKNAME"/>
+            <result property="phoneNum" column="PHONENUM"/>
+            <result property="name" column="mname"/>
+            <result property="email" column="EMAIL"/>
+        </association>
+        <collection property="travellers" ofType="com.crm.domin.Traveller">
+            <id property="id" column="tid"/>
+            <result property="name" column="tname"/>
+            <result property="sex" column="SEX"/>
+            <result property="phoneNum" column="PHONENUM"/>
+            <result property="credentialsType" column="CREDENTIALSTYPE"/>
+            <result property="credentialsNum" column="CREDENTIALSNUM"/>
+            <result property="travellerType" column="TRAVELLERTYPE"/>
+        </collection>
+    </resultMap>
+    <select id="findOrdersById" parameterType="string" resultMap="OrdersInfo">
+        SELECT o.ID,o.ORDERNUM,o.ORDERTIME,o.PEOPLECOUNT,o.ORDERDESC,o.PAYTYPE,
+				p.ID pid,p.PRODUCTNAME,p.CITYNAME,p.DEPARTURETIME,p.PRODUCTPRICE,
+				m.ID mid,m.NICKNAME,m.PHONENUM,m.NAME mname,m.EMAIL,
+				t.ID tid,t.NAME tname,t.SEX,t.PHONENUM,t.CREDENTIALSTYPE,t.CREDENTIALSNUM,t.TRAVELLERTYPE
+        FROM ORDERS o
+        LEFT JOIN PRODUCT p
+        ON o.PRODUCTID = p.ID
+        LEFT JOIN MEMBER m
+        ON o.MEMBERID = m.ID
+        LEFT JOIN ORDER_TRAVELLER ot
+        ON o.ID = ot.ORDERID
+        LEFT JOIN TRAVELLER t
+        ON ot.TRAVELLERID = t.ID
+        WHERE o.ID=#{id}
+    </select>
+</mapper>

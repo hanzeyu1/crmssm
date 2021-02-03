@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                http://www.springframework.org/schema/beans/spring-beans.xsd
+                http://www.springframework.org/schema/security
+                http://www.springframework.org/schema/security/spring-security.xsd">
+
+    <!-- springsecurity支持的三种权限控制开启 -->
+    <security:global-method-security
+            pre-post-annotations="enabled"
+            jsr250-annotations="enabled"
+            secured-annotations="enabled"/>
+
+    <!-- 不拦截的路径，登录相关的页面和静态资源应该不拦截 -->
+    <security:http security="none" pattern="/login.do"/>
+    <security:http security="none" pattern="/failer.do"/>
+    <security:http security="none" pattern="/css/**"/>
+    <security:http security="none" pattern="/img/**"/>
+    <security:http security="none" pattern="/plugins/**"/>
+
+    <!-- auto-config="ture" 自动配置 没有手动配置东西会使用springsecurity提供的（包括登录页面等） -->
+    <security:http auto-config="true" use-expressions="true">
+        <!-- 配置具体的拦截的规则 pattern="请求路径的规则" access="访问系统的人，必须有ROLE_USER的角色" -->
+        <security:intercept-url pattern="/**" access="hasAnyRole('ROLE_USER','ROLE_ADMIN')"/>
+
+        <!-- 自定义登陆页面，
+               login-page 自定义登陆页面
+               authentication-failure-url 用户权限校验失败之后才会跳转到这个页面，如果数据库中没有这个用户则不会跳转到这个页面。
+               default-target-url 默认页面
+          authentication-success-forward-url 登陆成功后跳转的页面。
+               注：登陆页面用户名固定 username，密码password，action:login -->
+        <security:form-login
+                login-page="/login.do"
+                login-processing-url="/login"
+                username-parameter="username"
+                password-parameter="password"
+                authentication-failure-url="/failer.do"
+                default-target-url="/login.do"
+                authentication-success-forward-url="/main.do"
+        />
+
+        <!-- 登出，
+               invalidate-session 是否删除session
+               logout-url：登出处理链接
+               logout-successurl：登出成功页面
+               注：登出操作 只需要链接到 logout即可登出当前用户 -->
+        <security:logout invalidate-session="true" logout-url="/logout"
+                         logout-success-url="/login.do"/>
+
+        <!-- 关闭跨域 -->
+        <security:csrf disabled="true"/>
+
+    </security:http>
+
+    <!-- 权限配置管理器 -->
+    <security:authentication-manager>
+        <security:authentication-provider user-service-ref="usersServiceImpl">
+            <security:password-encoder ref="bCryptPasswordEncoder"/>
+        </security:authentication-provider>
+    </security:authentication-manager>
+
+    <bean name="bCryptPasswordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+</beans>

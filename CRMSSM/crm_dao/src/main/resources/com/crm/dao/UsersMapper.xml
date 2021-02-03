@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace与实体类相映射-->
+<mapper namespace="com.crm.dao.UsersMapper">
+
+    <resultMap id="UserForRole" type="com.crm.domin.Users">
+        <id property="id" column="id"/>
+        <result property="email" column="EMAIL"/>
+        <result property="username" column="USERNAME"/>
+        <result property="password" column="PASSWORD"/>
+        <result property="phoneNum" column="PHONENUM"/>
+        <result property="status" column="STATUS"/>
+        <collection property="roles" ofType="com.crm.domin.Role">
+            <id property="id" column="rid"/>
+            <result property="roleName" column="ROLENAME"/>
+            <result property="roleDesc" column="ROLEDESC"/>
+        </collection>
+    </resultMap>
+    <resultMap id="UsersForPermission" type="com.crm.domin.Users">
+        <id property="id" column="id"/>
+        <result property="email" column="EMAIL"/>
+        <result property="username" column="USERNAME"/>
+        <result property="password" column="PASSWORD"/>
+        <result property="phoneNum" column="PHONENUM"/>
+        <result property="status" column="STATUS"/>
+        <collection property="roles" ofType="com.crm.domin.Role">
+            <id property="id" column="rid"/>
+            <result property="roleName" column="ROLENAME"/>
+            <result property="roleDesc" column="ROLEDESC"/>
+            <collection property="permissions" ofType="com.crm.domin.Permission">
+                <id property="id" column="pid"/>
+                <result property="permissionName" column="PERMISSIONNAME"/>
+                <result property="url" column="URL"/>
+            </collection>
+        </collection>
+    </resultMap>
+
+
+    <select id="findUsersForRoleByUsername" resultMap="UserForRole" parameterType="string">
+        SELECT u.ID,u.EMAIL,u.USERNAME,u.PASSWORD,u.PHONENUM,u.STATUS,
+                r.ID rid,r.ROLENAME,r.ROLEDESC
+        FROM USERS u
+        LEFT JOIN USERS_ROLE ur
+        ON u.ID = ur.USERID
+        LEFT JOIN ROLE r
+        ON ur.ROLEID = r.ID
+        WHERE u.USERNAME=#{username}
+    </select>
+    <select id="findUsersForPermissionById" resultMap="UsersForPermission" parameterType="string">
+        SELECT u.ID,u.EMAIL,u.USERNAME,u.PASSWORD,u.PHONENUM,u.STATUS,
+                r.ID rid,r.ROLENAME,r.ROLEDESC,
+                p.ID pid,p.PERMISSIONNAME,p.URL
+        FROM USERS u
+        LEFT JOIN USERS_ROLE ur
+        ON u.ID = ur.USERID
+        LEFT JOIN ROLE r
+        ON ur.ROLEID = r.ID
+        LEFT JOIN ROLE_PERMISSION rp
+        ON r.ID = rp.ROLEID
+        LEFT JOIN PERMISSION P
+        ON rp.PERMISSIONID = p.ID
+        WHERE u.ID = #{id}
+    </select>
+
+    <select id="findAllUsers" resultType="com.crm.domin.Users">
+        SELECT *
+        FROM USERS
+    </select>
+
+    <insert id="addUsers" parameterType="com.crm.domin.Users">
+        INSERT INTO
+          USERS(EMAIL,USERNAME,PASSWORD,PHONENUM,STATUS)
+        VALUES(#{email},#{username},#{password},#{phoneNum},#{status})
+    </insert>
+
+    <insert id="addRoleForUser" parameterType="string">
+        INSERT INTO
+           USERS_ROLE(USERID,ROLEID)
+        VALUES(#{uid},#{rid})
+    </insert>
+
+    <select id="findRolesForAddRolesToUsers" parameterType="string" resultType="com.crm.domin.Role">
+        SELECT *
+        FROM ROLE r
+        WHERE r.ID
+        NOT IN(
+            SELECT ur.ROLEID
+            FROM USERS_ROLE ur
+            WHERE ur.USERID = #{uid})
+    </select>
+    <select id="findUsersById" resultType="com.crm.domin.Users" parameterType="string">
+        SELECT *
+        FROM USERS
+        WHERE ID=#{id}
+    </select>
+</mapper>
